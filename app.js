@@ -70,17 +70,32 @@ app.get("/", (req, res) => {
     res.render("index", { user: req.user });
 });
 app.get("/sign-up", (req, res) => res.render("sign-up-form"));
-app.post("/sign-up", (req, res, next) => {
-    const user = new User({
-      username: req.body.username,
-      password: req.body.password
-    }).save(err => {
+// app.post("/sign-up", (req, res, next) => {
+//     const user = new User({
+//       username: req.body.username,
+//       password: req.body.password
+//     }).save(err => {
+//       if (err) { 
+//         return next(err);
+//       };
+//       res.redirect("/");
+//     });
+//   });
+
+app.post("/sign-up", async (req,res,next) => {
+  let salt = await bcrypt.genSalt(10);
+  let hash = await bcrypt.hash(req.body.password, salt);
+  const user = new User({
+    username: req.body.username,
+    password: hash
+  })
+    .save(err => {
       if (err) { 
         return next(err);
       };
       res.redirect("/");
     });
-  });
+});
 
 app.post(
     "/log-in",
